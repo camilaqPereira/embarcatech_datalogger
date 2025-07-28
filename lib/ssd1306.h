@@ -9,9 +9,9 @@
 #define DISPLAY_HEIGHT 64
 
 // Definição de pinos e endereço do display I2C
-#define I2C_PORT_SSD1306 i2c1            // Porta I2C para comunicação
-#define I2C_SDA_SSD1306 14               // Pino SDA para I2C
-#define I2C_SCL_SSD1306 15               // Pino SCL para I2C
+#define DISPLAY_I2C_PORT i2c1            // Porta I2C para comunicação
+#define DISPLAY_I2C_SDA 14               // Pino SDA para I2C
+#define DISPLAY_I2C_SCL 15               // Pino SCL para I2C
 #define DISPLAY_ADDRESS 0x3C     // Endereço do display OLED
 
 
