@@ -12,8 +12,8 @@
 #define DISPLAY_I2C_PORT i2c1            // Porta I2C para comunicação
 #define DISPLAY_I2C_SDA 14               // Pino SDA para I2C
 #define DISPLAY_I2C_SCL 15               // Pino SCL para I2C
-#define DISPLAY_ADDRESS 0x3C     // Endereço do display OLED
-
+#define DISPLAY_ADDRESS 0x3C             // Endereço do display OLED
+#define DISPLAY_FREQUENCY 400000         // Frequência de operação do I2C
 
 
 typedef enum {
