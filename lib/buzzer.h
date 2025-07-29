@@ -39,10 +39,4 @@ void buzzer_setup_pwm(uint pin, uint freq_hz);
 void buzzer_play(uint times, uint freq_hz, uint duration_ms);
 
 
-/*
-    @brief Funcao para tocar a escala musical simples
-*/
-
-void buzzer_play_melody();
-
 #endif
