@@ -14,12 +14,15 @@ const uint32_t COLOR_PURPLE = 1u << GPIO_RED_LED | 1u << GPIO_BLUE_LED;
 
 ssd1306_t ssd;
 
-static bool is_sd_mounted = false;
-static char mount_sd_card = 'i'; // 'i' for idle, 'm' for mount, 'u' for unmount
-static bool is_capturing_data = false;
+volatile bool is_sd_mounted = false;
+volatile char mount_sd_card = 'i'; // 'i' for idle, 'm' for mount, 'u' for unmount
+volatile bool is_capturing_data = false;
 
-static char filename[20] = "data.csv"; // Default filename for data capture
-static char csv_title[] = "id,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"; // CSV header
+const char filename[20] = "data.csv"; // Default filename for data capture
+const char csv_title[] = "id,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"; // CSV header
+
+
+
 int main()
 {
     /* ---------------------- INICIALIZACAO DE PERIFERICOS ---------------------- */
@@ -205,6 +208,7 @@ static void draw_capture_interface(){
     ssd1306_draw_string(&ssd, "ID: ", 5, 45);
     ssd1306_send_data(&ssd);
 }
+
 static int capture_data_and_save(){
     FIL file;
     FRESULT res = f_open(&file, filename, FA_WRITE | FA_CREATE_ALWAYS);
