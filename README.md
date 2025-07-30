@@ -8,7 +8,7 @@
 
 ## Sobre o projeto
 
-<p align="center>
+<p align="justify">
 
 A análise de movimento é fundamental para sistemas de navegação, 
 controle de processos em tempo real, logística, robótica e 
