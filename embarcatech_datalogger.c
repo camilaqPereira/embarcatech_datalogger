@@ -12,14 +12,15 @@ const uint32_t COLOR_WHITE = 1u << GPIO_RED_LED | 1u << GPIO_GREEN_LED | 1u << G
 const uint32_t COLOR_YELLOW = 1u << GPIO_RED_LED | 1u << GPIO_GREEN_LED;
 const uint32_t COLOR_PURPLE = 1u << GPIO_RED_LED | 1u << GPIO_BLUE_LED;
 
+
 ssd1306_t ssd;
 
-volatile bool is_sd_mounted = false;
-volatile char mount_sd_card = 'i'; // 'i' for idle, 'm' for mount, 'u' for unmount
-volatile bool is_capturing_data = false;
+volatile bool is_sd_mounted = false;            // Flag para verificar se o microSD está montado
+volatile char mount_sd_card = 'i';              // 'i' para idle, 'm' para mount, 'u' para unmount
+volatile bool is_capturing_data = false;        // Flag para verificar se a captura de dados está ativa
 
-const char filename[20] = "data.csv"; // Default filename for data capture
-const char csv_title[] = "id,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"; // CSV header
+const char filename[20] = "data.csv"; // Nome do arquivo CSV
+const char csv_title[] = "id,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"; // Cabeçalho do CSV
 
 
 
@@ -64,30 +65,33 @@ int main()
     mpu6050_init();
     sleep_ms(4000);
 
-    System_state_t current_state = SYSTEM_STATE_IDLE;
+    System_state_t current_state = SYSTEM_STATE_IDLE;  //Armazena o estado atual do sistema
     
     while (true) {
         switch (current_state) {
             case SYSTEM_STATE_IDLE:
 
-                if(!is_sd_mounted && is_capturing_data){
+                if(!is_sd_mounted && is_capturing_data){ //Verificacao: SD não estiver montado e a captura de dados estiver ativa
                     gpio_put_masked(LED_MASK, COLOR_PURPLE);
                     draw_string("Captura de dados interrompida. SD nao montado.", 0, 0);
                     sleep_ms(2000);
                     is_capturing_data = false; 
-                }else if (is_sd_mounted) {
+                
+                }else if (is_sd_mounted) {  // SD montado
                     gpio_put_masked(LED_MASK, COLOR_GREEN);
                     draw_idle_interface();
-                } else {
+                
+                } else {      // SD não montado
                     gpio_put_masked(LED_MASK, COLOR_WHITE);
                     draw_idle_interface();
                     
                 }
 
-                if (is_sd_mounted && is_capturing_data) {
+                if (is_sd_mounted && is_capturing_data) {       // Se o SD estiver montado e a captura de dados estiver ativa
                     current_state = SYSTEM_STATE_READING;
+                
                 } else if (mount_sd_card != 'i') {
-                    current_state = (mount_sd_card == 'm') ? SYSTEM_STATE_MOUNTING : SYSTEM_STATE_UNMOUNTING;
+                    current_state = (mount_sd_card == 'm') ? SYSTEM_STATE_MOUNTING : SYSTEM_STATE_UNMOUNTING; // Seta o estado do sistema para montagem ou desmontagem do SD
                 }
 
                 break;
@@ -96,14 +100,16 @@ int main()
                 draw_string("Montando SD...", 0, 0);
                 gpio_put_masked(LED_MASK, COLOR_YELLOW);
 
-                if(!is_sd_mounted && run_mount() == 0) {
+                if(!is_sd_mounted && run_mount() == 0) { // Verificacao: SD não estiver montado e a montagem for bem-sucedida
                     is_sd_mounted = true;
+                
                 }else {
                     gpio_put_masked(LED_MASK, COLOR_PURPLE);
                     draw_string("Erro ao montar SD. Verifique o log.", 0, 0);
                     sleep_ms(2000);
                 }
                 
+                // Reset de parametros
                 current_state = SYSTEM_STATE_IDLE;
                 mount_sd_card = 'i';
                 break;
@@ -112,7 +118,7 @@ int main()
                 draw_string("Desmontando SD...", 0, 0);
                 gpio_put_masked(LED_MASK, 1u << GPIO_RED_LED | 1u << GPIO_GREEN_LED);
 
-                if(is_sd_mounted && run_unmount() == 0) {
+                if(is_sd_mounted && run_unmount() == 0) { // Verificacao: Se o SD estiver montado e a desmontagem for bem-sucedida
                    is_sd_mounted = false;
                 }else{   
                     gpio_put_masked(LED_MASK, COLOR_PURPLE);               
@@ -120,6 +126,7 @@ int main()
                     sleep_ms(2000);
                 }
 
+                // Reset de parametros
                 mount_sd_card = 'i';
                 current_state = SYSTEM_STATE_IDLE;
                 break;
@@ -131,7 +138,7 @@ int main()
 
                 int res = capture_data_and_save();
                 
-                if(res < 0) {
+                if(res < 0) { // Se houve erro na captura de dados
                     gpio_put_masked(LED_MASK, COLOR_PURPLE);
                     draw_string("Erro ao capturar dados. Verifique o log.", 0, 0);
                     buzzer_play(1, 1000, 700);
@@ -139,7 +146,7 @@ int main()
                 }
                 
                 
-                // Fim da captura
+                // Reset de parametros
                 current_state = SYSTEM_STATE_IDLE;
                 is_capturing_data = false; // Reset capture state
                 gpio_set_irq_enabled(GPIO_BUTTONA, GPIO_IRQ_EDGE_FALL,true); // Re-enable button A interrupt
@@ -210,6 +217,7 @@ static void draw_capture_interface(){
 }
 
 static int capture_data_and_save(){
+    // Abrindo o arquivo CSV para escrita
     FIL file;
     FRESULT res = f_open(&file, filename, FA_WRITE | FA_CREATE_ALWAYS);
     
@@ -217,6 +225,7 @@ static int capture_data_and_save(){
         return -1; // Erro ao abrir o arquivo
     }
 
+    // Escrevendo o cabeçalho no arquivo CSV
     UINT bw;
     res = f_write(&file, csv_title, strlen(csv_title), &bw);
 
@@ -224,6 +233,8 @@ static int capture_data_and_save(){
         f_close(&file);
         return -1; // Erro ao escrever o cabeçalho
     }
+
+    // Captura e armazenamento de dados do MPU6050
     int id = 0;
     while(is_capturing_data) {
         gpio_put_masked(LED_MASK, COLOR_RED); // Acende o LED vermelho enquanto captura dados
@@ -232,6 +243,7 @@ static int capture_data_and_save(){
         mpu6050_data_t data;
         mpu6050_read_raw(&data);
 
+        // Formatacao de dados
         float ax = data.accel[0] / MPU6050_ACCEL_SCALE;
         float ay = data.accel[1] / MPU6050_ACCEL_SCALE;
         float az = data.accel[2] / MPU6050_ACCEL_SCALE;
@@ -239,16 +251,17 @@ static int capture_data_and_save(){
         float gy = (float)data.gyro[1];
         float gz = (float)data.gyro[2];
         
-
+        // Montagem da string de dados
         char buffer[120];
         char id_buffer[10];
         sprintf(buffer, "%d,%d,%d,%d,%d,%d,%d\n", id, (int)ax, (int)ay, (int)az, (int)gx, (int)gy, (int)gz);
         snprintf(id_buffer, sizeof(id_buffer), "%d", id++);
 
         
-        ssd1306_draw_string(&ssd, id_buffer, 37, 45); // Display the current ID on the OLED
-        ssd1306_send_data(&ssd); // Update the display
+        ssd1306_draw_string(&ssd, id_buffer, 37, 45); // Exibe id atual no display
+        ssd1306_send_data(&ssd); 
 
+        // Escreve os dados no arquivo CSV
         res = f_write(&file, buffer, strlen(buffer), &bw);
 
         if (res != FR_OK)
@@ -261,6 +274,7 @@ static int capture_data_and_save(){
         sleep_ms(250); // Intervalo entre capturas 
     }
 
+    // Fechando o arquivo CSV
     f_close(&file);
     return 0; // Sucesso
 }
