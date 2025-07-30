@@ -34,6 +34,7 @@ project(embarcatech_datalogger C CXX ASM)
 pico_sdk_init()
 
 include_directories(${CMAKE_SOURCE_DIR}/lib)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/FatFs_SPI)
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.c)
 
@@ -51,9 +52,14 @@ pico_set_program_version(${PROJECT_NAME} "0.1")
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 
-# Add the standard library to the build
+# Add libraries to the build
 target_link_libraries(${PROJECT_NAME}
-        pico_stdlib)
+        pico_stdlib
+        hardware_i2c
+        hardware_pwm
+        hardware_timer
+        hardware_clocks
+        FatFs_SPI)
 
 # Add the standard include files to the build
 target_include_directories(${PROJECT_NAME} PRIVATE
