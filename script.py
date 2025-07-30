@@ -65,13 +65,13 @@ if __name__ == "__main__":
     while True:
         print("\nSelecione a plotagem desejada:")
         print("1 - Painel principal")
-        print("2 - Gráfico da aceleração X");
-        print("3 - Gráfico da aceleração Y");
-        print("4 - Gráfico da aceleração Z");
-        print("5 - Gráfico do giroscópio X");
-        print("6 - Gráfico do giroscópio Y");
-        print("7 - Gráfico do giroscópio Z");
-        print("8 - Exibir dados brutos (primeiras linhas)");
+        print("2 - Gráfico da aceleração X")
+        print("3 - Gráfico da aceleração Y")
+        print("4 - Gráfico da aceleração Z")
+        print("5 - Gráfico do giroscópio X")
+        print("6 - Gráfico do giroscópio Y")
+        print("7 - Gráfico do giroscópio Z")
+        print("8 - Exibir dados brutos (primeiras linhas)")
         print("9 - Sair")
 
         choice = input("Opção: ")
@@ -93,7 +93,6 @@ if __name__ == "__main__":
         elif choice == "8":
             # Exibindo as primeiras linhas dos dados
             print(df.head())
-            break
         elif choice == "9":
             print("Saindo...")
             break
